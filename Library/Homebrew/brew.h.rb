@@ -399,6 +399,23 @@ def outdated_brews
   return results
 end
 
+def search_brews text
+  require "formula"
+  formulae = Formulary.names with_aliases=true
+  if text =~ /^\/(.*)\/$/
+    results = formulae.grep(Regexp.new($1))
+  else
+    search_term = Regexp.escape(text || "")
+    results = formulae.grep(/.*#{search_term}.*/)
+  end
+
+  # Filter out aliases when the full name was also found
+  aliases = Formulary.get_aliases
+  return results.select do |r|
+    aliases[r] == nil or not (results.include? aliases[r])
+  end
+end
+
 ########################################################## class PrettyListing
 class PrettyListing
   def initialize path
@@ -464,13 +481,9 @@ end
 class Cleaner
   def initialize f
     @f=f
-    
-    # correct common issues
-    share=f.prefix+'share'
-    (f.prefix+'man').mv share rescue nil
-    
+
     [f.bin, f.sbin, f.lib].each {|d| clean_dir d}
-    
+
     # info pages suck
     info = f.share+'info'
     info.rmtree if info.directory? and not f.skip_clean? info
@@ -560,7 +573,7 @@ def llvm_build
   if MACOS_VERSION >= 10.6
     xcode_path = `/usr/bin/xcode-select -print-path`.chomp
     return nil if xcode_path.empty?
-    `#{xcode_path}/usr/bin/llvm-gcc-4.2 -v 2>&1` =~ /LLVM build (\d{4,})/
+    `#{xcode_path}/usr/bin/llvm-gcc -v 2>&1` =~ /LLVM build (\d{4,})/
     $1.to_i
   end
 end
