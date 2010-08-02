@@ -1,5 +1,7 @@
 Homebrew
 ========
+this fork of homebrew will focus on tools and software used in nlp and computational linguistics. if yr looking for plain vanilla package management for the mac, stick with [the source][homepage], otherwise this will pollute yr kompooter with large datasets and very buggy code.
+
 Features and usage are [summarized on the homepage][homepage].
 
 
